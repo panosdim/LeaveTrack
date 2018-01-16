@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<GridPane alignment="TOP_CENTER" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/8.0.121"
+          xmlns:fx="http://javafx.com/fxml/1" fx:controller="LeaveTrack.Controller">
+    <columnConstraints>
+        <ColumnConstraints/>
+        <ColumnConstraints/>
+        <ColumnConstraints/>
+        <ColumnConstraints/>
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints/>
+        <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+        <RowConstraints/>
+        <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+        <RowConstraints/>
+        <RowConstraints minHeight="10.0" vgrow="ALWAYS"/>
+    </rowConstraints>
+    <TextField fx:id="txtRemain" disable="true" editable="false" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+    <Label text="Total" GridPane.rowIndex="1"/>
+    <ComboBox fx:id="cmbLeaveTotal" editable="true" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    <Label text="Remain" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+    <ProgressBar maxWidth="1.7976931348623157E308" progress="0.0" GridPane.columnSpan="2147483647"
+                 GridPane.rowIndex="2"/>
+    <Label text="From" GridPane.rowIndex="3"/>
+    <DatePicker fx:id="dtpFrom" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+    <Label text="Until" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+    <DatePicker fx:id="dtpUntil" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+    <TableView fx:id="tblLeaves" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2147483647"
+               GridPane.rowIndex="5">
+        <columns>
+            <TableColumn fx:id="idColumn" prefWidth="44.0" text="ID"/>
+            <TableColumn fx:id="fromColumn" prefWidth="177.0" text="From"/>
+            <TableColumn fx:id="untilColumn" prefWidth="153.0" text="Until"/>
+            <TableColumn fx:id="daysColumn" prefWidth="86.0" text="Days"/>
+        </columns>
+    </TableView>
+    <HBox spacing="5.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="4">
+        <children>
+            <ToolBar HBox.hgrow="ALWAYS">
+                <items>
+                    <Label text="Year"/>
+                    <ComboBox fx:id="cmbYear" prefWidth="150.0"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnAdd" defaultButton="true" mnemonicParsing="false" onAction="#add_leave"
+                            text="Add"/>
+                    <Button fx:id="btnSave" defaultButton="true" mnemonicParsing="false" onAction="#update_leave"
+                            text="Save"/>
+                    <Button fx:id="btnClear" cancelButton="true" mnemonicParsing="false" onAction="#cancel_edit"
+                            text="Clear"/>
+                    <Button fx:id="btnEdit" mnemonicParsing="false" onAction="#edit_leave" style="-fx-base: yellow;"
+                            text="Edit"/>
+                    <Button fx:id="btnDelete" mnemonicParsing="false" onAction="#delete_leave"
+                            style="-fx-base: crimson;" text="Delete"/>
+                </items>
+            </ToolBar>
+        </children>
+    </HBox>
+</GridPane>
