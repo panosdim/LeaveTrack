@@ -12,7 +12,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("mainWindow.fxml"));
-        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("LeaveTrack.png")));
+        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/LeaveTrack.png")));
         primaryStage.setTitle("Leave Track");
         primaryStage.setScene(new Scene(root, 465, 400));
         primaryStage.setResizable(false);

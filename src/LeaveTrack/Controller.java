@@ -8,6 +8,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+import org.controlsfx.control.StatusBar;
 import org.controlsfx.control.decoration.GraphicDecoration;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
@@ -34,17 +35,28 @@ public class Controller {
     public TableColumn<AnnualLeave, LocalDate> untilColumn;
     public TableColumn<AnnualLeave, Integer> daysColumn;
     public TextField txtRemain;
-    private final DBHandler db = new DBHandler();
-    private final ObservableList<AnnualLeave> annualLeaves = FXCollections.observableArrayList();
-    private AnnualLeave selAnnualLeave;
+    public StatusBar statusBar;
     public Button btnSave;
     public Button btnClear;
     public Button btnEdit;
     public Button btnDelete;
+    private final DBHandler db = new DBHandler();
+    private final ObservableList<AnnualLeave> annualLeaves = FXCollections.observableArrayList();
+    public Label lblRemain;
+    public ProgressBar progress;
+    private AnnualLeave selAnnualLeave;
     private ValidationSupport leaveValidation = new ValidationSupport();
     private Preferences prefs = Preferences.userNodeForPackage(LeaveTrack.Main.class);
-
     private static final Image ERROR_IMAGE = new Image(GraphicValidationDecoration.class.getResource("/impl/org/controlsfx/control/validation/decoration-error.png").toExternalForm());
+    private final ImageView ok_icon = new ImageView(new Image(getClass().getResourceAsStream("/ok.png")));
+    private final ImageView error_icon = new ImageView(new Image(getClass().getResourceAsStream("/error.png")));
+    private final ImageView info_icon = new ImageView(new Image(getClass().getResourceAsStream("/info.png")));
+
+    private enum MessageType {
+        OK,
+        ERROR,
+        INFO
+    }
 
     public void initialize() {
         // Initialize annual leave days combo box
@@ -60,6 +72,7 @@ public class Controller {
             try {
                 prefs.putInt(PREF_NAME, Integer.parseInt(newValue));
                 removeAllDecorations(cmbLeaveTotal.getEditor());
+                updateRemainLeave();
             } catch (NumberFormatException ex) {
                 addDecoration(cmbLeaveTotal.getEditor(), new GraphicDecoration(new ImageView(ERROR_IMAGE), Pos.BOTTOM_LEFT));
             }
@@ -79,8 +92,10 @@ public class Controller {
         // Initialize Year combo box
         cmbYear.getItems().addAll(db.getYears());
         cmbYear.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
-            db.getAnnualLeaves(annualLeaves, newValue);
-            tblLeaves.setItems(annualLeaves);
+            if (newValue != null) {
+                db.getAnnualLeaves(annualLeaves, newValue);
+                tblLeaves.setItems(annualLeaves);
+            }
         }));
         cmbYear.getSelectionModel().selectLast();
 
@@ -188,56 +203,66 @@ public class Controller {
         btnClear.setVisible(false);
         btnEdit.setDisable(true);
         btnDelete.setDisable(true);
+
+        // Initialize status bar message
+        showMessage("Ready", MessageType.INFO);
+
+        // Initialize remaining annual leave part
+        updateRemainLeave();
     }
 
     public void add_leave() {
-        if (leaveValidation.isInvalid()) {
-            leaveValidation.setErrorDecorationEnabled(true);
-            leaveValidation.initInitialDecoration();
-            leaveValidation.redecorate();
+        if (checkValidation()) {
+            showMessage("Please fill all required fields", MessageType.ERROR);
             return;
         }
 
         AnnualLeave data = new AnnualLeave(
                 dtpFrom.getValue(),
                 dtpUntil.getValue(),
-                GreekBankHolidays.calculateWorkingDays(dtpFrom.getValue(), dtpUntil.getValue()),
+                WorkingDays.calculateWorkingDays(dtpFrom.getValue(), dtpUntil.getValue()),
                 -1);
 
         if (db.newAnnualLeave(data)) {
-            System.out.println("Annual Leave added successfully.");
+            showMessage("Annual Leave added successfully", MessageType.OK);
             dtpFrom.setValue(null);
             dtpUntil.setValue(null);
-            db.getAnnualLeaves(annualLeaves, cmbYear.getValue());
-            tblLeaves.setItems(annualLeaves);
+            updateUI();
             leaveValidation.setErrorDecorationEnabled(false);
         } else {
-            System.out.println("Failed to add new Annual Leave.");
+            showMessage("Failed to add new Annual Leave", MessageType.ERROR);
         }
     }
 
     public void update_leave() {
-        if (leaveValidation.isInvalid()) {
-            leaveValidation.setErrorDecorationEnabled(true);
-            leaveValidation.initInitialDecoration();
-            leaveValidation.redecorate();
+        if (checkValidation()) {
+            showMessage("Please fill all required fields", MessageType.ERROR);
             return;
         }
 
         selAnnualLeave.setFrom(dtpFrom.getValue());
         selAnnualLeave.setUntil(dtpUntil.getValue());
-        selAnnualLeave.setDays(GreekBankHolidays.calculateWorkingDays(dtpFrom.getValue(), dtpUntil.getValue()));
+        selAnnualLeave.setDays(WorkingDays.calculateWorkingDays(dtpFrom.getValue(), dtpUntil.getValue()));
 
         if (db.setAnnualLeave(selAnnualLeave)) {
-            System.out.println("Annual Leave updated successfully.");
+            showMessage("Annual Leave updated successfully", MessageType.OK);
             dtpFrom.setValue(null);
             dtpUntil.setValue(null);
-            db.getAnnualLeaves(annualLeaves, cmbYear.getValue());
-            tblLeaves.setItems(annualLeaves);
+            updateUI();
             cancel_edit();
         } else {
-            System.out.println("Failed to update Annual Leave.");
+            showMessage("Failed to update Annual Leave", MessageType.ERROR);
         }
+    }
+
+    private boolean checkValidation() {
+        if (leaveValidation.isInvalid()) {
+            leaveValidation.setErrorDecorationEnabled(true);
+            leaveValidation.initInitialDecoration();
+            leaveValidation.redecorate();
+            return true;
+        }
+        return false;
     }
 
     public void cancel_edit() {
@@ -259,17 +284,68 @@ public class Controller {
     }
 
     public void delete_leave() {
+        selAnnualLeave = tblLeaves.getSelectionModel().getSelectedItem();
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete Confirmation");
+        alert.setHeaderText("Delete leave with ID " + selAnnualLeave.getId());
         alert.setContentText("Do you really want to delete the selected leave?");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            if (db.deleteAnnualLeave(tblLeaves.getSelectionModel().getSelectedItem().getId())) {
-                System.out.println("Annual Leave Deleted successfully");
+            if (db.deleteAnnualLeave(selAnnualLeave.getId())) {
+                showMessage("Annual Leave deleted successfully", MessageType.OK);
+                updateUI();
+            } else {
+                showMessage("Failed to delete Annual Leave", MessageType.ERROR);
             }
+        }
+    }
+
+    private void showMessage(String message, MessageType type) {
+        switch (type) {
+            case OK:
+                statusBar.setGraphic(ok_icon);
+                break;
+            case ERROR:
+                statusBar.setGraphic(error_icon);
+                break;
+            case INFO:
+                statusBar.setGraphic(info_icon);
+                break;
+        }
+        statusBar.setText(message);
+    }
+
+    private void updateUI() {
+        cmbYear.getItems().clear();
+        cmbYear.getItems().addAll(db.getYears());
+        cmbYear.getSelectionModel().selectLast();
+        if (cmbYear.getItems().size() > 0) {
             db.getAnnualLeaves(annualLeaves, cmbYear.getValue());
             tblLeaves.setItems(annualLeaves);
+        } else {
+            annualLeaves.clear();
+            tblLeaves.setItems(annualLeaves);
         }
+        updateRemainLeave();
+    }
+
+    private int calculateYearLeaves() {
+        int total = 0;
+        if (tblLeaves.getItems().size() > 0) {
+            for (AnnualLeave i : tblLeaves.getItems()) {
+                total += i.getDays();
+            }
+        }
+        return total;
+    }
+
+    private void updateRemainLeave() {
+        int yearLeaves = calculateYearLeaves();
+        int total = cmbLeaveTotal.getValue();
+        int remain = total - yearLeaves;
+        double prg = (double) remain / (double) total;
+        progress.setProgress(prg);
+        lblRemain.setText(remain + " days");
     }
 }

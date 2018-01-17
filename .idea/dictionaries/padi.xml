@@ -2,8 +2,11 @@
   <dictionary name="padi">
     <words>
       <w>controlsfx</w>
+      <w>jdbc</w>
       <w>ochi</w>
       <w>prefs</w>
+      <w>sqlite</w>
+      <w>yyyy</w>
     </words>
   </dictionary>
 </component>

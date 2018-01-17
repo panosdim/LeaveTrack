@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-public class GreekBankHolidays {
+public class WorkingDays {
     /**
      * @param year the year of which we want to get the Orthodox Easter date
      * @return the date of the Orthodox easter of the given year

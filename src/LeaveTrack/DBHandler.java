@@ -51,7 +51,7 @@ class DBHandler {
         }
     }
 
-    boolean getAnnualLeaves(ObservableList<AnnualLeave> list, Year year) {
+    void getAnnualLeaves(ObservableList<AnnualLeave> list, Year year) {
         try {
             list.clear();
             Statement sta = con.createStatement();
@@ -70,11 +70,9 @@ class DBHandler {
             }
             res.close();
             sta.close();
-            return true;
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        return false;
     }
 
     boolean setAnnualLeave(AnnualLeave data) {
