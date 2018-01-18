@@ -1,0 +1,30 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="LeaveTrack">
+    <output-path>$PROJECT_DIR$/out/artifacts/LeaveTrack</output-path>
+    <properties id="javafx-properties">
+      <options>
+        <option name="appClass" value="LeaveTrack.Main" />
+        <option name="description" value="Help you keep track of your annual leaves" />
+        <option name="htmlPlaceholderId" value="" />
+        <option name="icons">
+          <JavaFxApplicationIcons>
+            <option name="linuxIcon" value="$PROJECT_DIR$/icons/LeaveTrack.png" />
+            <option name="windowsIcon" value="$PROJECT_DIR$/icons/LeaveTrack.ico" />
+          </JavaFxApplicationIcons>
+        </option>
+        <option name="nativeBundle" value="all" />
+        <option name="title" value="Leave Track" />
+        <option name="vendor" value="Panagiotis Dimopoulos" />
+        <option name="version" value="1.0" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="archive" name="JavaFXApp.jar">
+        <element id="module-output" name="LeaveTrack" />
+      </element>
+      <element id="file-copy" path="$PROJECT_DIR$/LeaveTrack.db3" />
+      <element id="library" level="project" name="controlsfx-9.0.0" />
+      <element id="library" level="project" name="sqlite-jdbc-3.21.0" />
+    </root>
+  </artifact>
+</component>
