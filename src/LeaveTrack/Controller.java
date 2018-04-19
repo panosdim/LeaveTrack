@@ -6,6 +6,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.controlsfx.control.StatusBar;
@@ -346,6 +347,13 @@ public class Controller {
         int remain = total - yearLeaves;
         double prg = (double) remain / (double) total;
         progress.setProgress(prg);
-        lblRemain.setText(remain + " days");
+        if (prg >= 0.70) {
+            lblRemain.setTextFill(Color.GREEN);
+        } else if (prg < 0.70 && prg >= 0.30) {
+            lblRemain.setTextFill(Color.ORANGE);
+        } else {
+            lblRemain.setTextFill(Color.RED);
+        }
+        lblRemain.setText("Remaining " + remain + " days");
     }
 }
